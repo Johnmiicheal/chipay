@@ -81,7 +81,7 @@ const Login = () => {
                 isClosable: true,
               });
               setTimeout(() => {
-                router.replace('/dash')
+                window.location.replace('/dash')
               }, 600)
             }else if(response.status === 400){
               toast({
