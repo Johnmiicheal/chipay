@@ -7,10 +7,13 @@ import {
   FormLabel,
   Input,
   Link,
+  useToast,
+  Image
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const Login = () => {
   function validateEmail(value: string) {
@@ -31,6 +34,13 @@ const Login = () => {
     return error;
   }
   const router = useRouter();
+  const toast = useToast();
+  useEffect(() => {
+    if(window.location.href.includes('#')){
+      window.location.replace('/login')
+    }
+  })
+  console.log(window.location.href)
   return (
     <Flex w="full" h="100vh" mb={-6} justify="space-between">
        <Head>
@@ -39,13 +49,18 @@ const Login = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/icons/chilinear.svg" />
       </Head>
-      <Flex bgImg="/login.png" bgPos="center" bgSize="cover" bgRepeat={"no-repeat"} w="35vw" h="full"></Flex>
+        
+      <Flex bgImg="/login.png" bgPos="center" bgSize="cover" bgRepeat={"no-repeat"} w="44vw" h="full" display={{ base: "none", lg: "flex" }} ></Flex>
       <Flex bg="white" align="center" justify="center" w="full">
-        <Flex align="center" justify={"center"} pt={10}>
+      <Flex direction="column" align="center" justify={"center"} pt={{ base: 0, lg: 10}}>
+          <Image src="/icons/chitext.svg" alt="chipay logo" w="40%" mb={5} />
+          <Text fontWeight={600} fontSize="xl" mb={5}>
+            Login to your Chipay Account
+          </Text>
           <Formik
             initialValues={{ email: "", password: "" }}
             onSubmit={ async (values, actions) => {
-              const response = await fetch("http://localhost:4000/login", {
+              const response = await fetch("https://api.greynote.app/chipay/login", {
                 method: "POST",
                 headers: {
                     accept: 'application/json',
@@ -53,15 +68,47 @@ const Login = () => {
                 },
                 body: JSON.stringify({ email: values.email, password: values.password })
             })
-            if(response.status ===200 ){
-              router.replace('/dash')
+            const data = await response.json()
+            console.log("Data Name", data.user.user_metadata.name)
+            if(response.status === 200  ){
+              toast({
+                title: "Login Successful",
+                description: `Welcome Back, ${data.user.user_metadata.name}`,
+                status: "success",
+                variant: "left-accent",
+                position: "top-right",
+                duration: 5000,
+                isClosable: true,
+              });
+              setTimeout(() => {
+                router.replace('/dash')
+              }, 600)
+            }else if(response.status === 400){
+              toast({
+                title: "Login Error",
+                description: `Email or Password is incorrect`,
+                status: "error",
+                variant: "left-accent",
+                position: "top-right",
+                duration: 5000,
+                isClosable: true,
+              });
+            }else{
+              toast({
+                title: "Server Error",
+                description: `Unable to complete the request, please try again later`,
+                status: "error",
+                variant: "left-accent",
+                position: "top-right",
+                duration: 5000,
+                isClosable: true,
+              });
             }
             }}
           >
             {(props) => (
               <Form>
-                <Text fontWeight={600} fontSize="xl" mb={5}>Login to Chipay</Text>
-                <Flex direction="column" gap={3} w="20vw">
+                <Flex direction="column" gap={3} w={{ lg: "24vw"}}>
                 <Field name="email" validate={validateEmail}>
                   {({ field, form }: any) => (
                     <FormControl
