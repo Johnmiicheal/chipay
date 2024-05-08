@@ -69,7 +69,6 @@ const Login = () => {
                 body: JSON.stringify({ email: values.email, password: values.password })
             })
             const data = await response.json()
-            console.log("Data Name", data.user.user_metadata.name)
             if(response.status === 200  ){
               toast({
                 title: "Login Successful",
@@ -83,7 +82,7 @@ const Login = () => {
               setTimeout(() => {
                 window.location.replace('/dash')
               }, 600)
-            }else if(response.status === 400){
+            }else if(data.error.name === "AuthApiError"){
               toast({
                 title: "Login Error",
                 description: `Email or Password is incorrect`,
